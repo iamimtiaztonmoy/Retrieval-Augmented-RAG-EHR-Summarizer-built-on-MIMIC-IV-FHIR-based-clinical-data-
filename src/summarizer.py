@@ -10,7 +10,7 @@ summary verbatim or apply optional post‑processing.
 Usage:
 
 ```python
-from src.summariser import RetrievalSummariser
+from src.summarizer import RetrievalSummariser
 summariser = RetrievalSummariser(list_of_summaries)
 result = summariser.query("0a8eebfd")  # returns best matching summary
 ```
@@ -69,3 +69,4 @@ class RetrievalSummariser:
         for idx, score in ranked[:top_k]:
             results.append((self.documents[idx], float(score)))
         return results
+

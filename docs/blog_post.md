@@ -2,11 +2,13 @@
 
 *29 August 2025*
 
+> Historical FHIR/TF-IDF baseline. For the new local LLM pipeline and its validation limits, see the root README. The original example scores are historical, not clinical evaluation.
+
 The rise of large language models and retrieval‑augmented generation has sparked enormous interest in building AI systems that can understand and summarise clinical information.  Yet real‑world electronic health record (EHR) data are often difficult to access and messy to work with.  Fortunately, the MIT Laboratory for Computational Physiology provides an **open‑access MIMIC‑IV Clinical Database Demo** that converts a small subset of the MIMIC‑IV database into the FHIR (Fast Healthcare Interoperability Resources) format.  This post walks through how I built a simple retrieval‑based summarisation system on top of that dataset.
 
 ## What’s in the demo dataset?
 
-The demo is a 100‑patient slice of the full MIMIC‑IV v2.2 and MIMIC‑IV‑ED v2.2 databases.  It contains FHIR resources in NDJSON format, such as `Patient`, `Condition`, `Medication`, `Observation` and many more.  Each resource is a JSON object on its own line, compressed with gzip.  Because the data are de‑identified and synthetic, there is no risk of exposing protected health information.  However, the dates have been shifted far into the future (e.g., birth dates in the 2080s) to further protect privacy.
+The demo is a 100‑patient slice of the full MIMIC‑IV v2.2 and MIMIC‑IV‑ED v2.2 databases.  It contains FHIR resources in NDJSON format, such as `Patient`, `Condition`, `Medication`, `Observation` and many more.  Each resource is a JSON object on its own line, compressed with gzip.  These are deidentified clinical demo records, not wholly synthetic patient records. Deidentification does not remove data-use and privacy obligations.  However, the dates have been shifted far into the future (e.g., birth dates in the 2080s) to further protect privacy.
 
 For this project I focused on two resource types:
 
@@ -69,3 +71,4 @@ Future directions include:
 * Implementing a full RAG pipeline with a knowledge base (vector store) and a generative model to answer arbitrary clinical questions about the patients.
 
 Nevertheless, this exercise demonstrates how even a small open dataset can be used to explore core techniques like FHIR parsing, TF‑IDF retrieval and API design.  If you’d like to experiment yourself, clone the repo, run `demo.py`, and start hacking!
+

@@ -1,0 +1,1 @@
+All records here are newly authored, fictional test fixtures. No MIMIC records, IDs, or notes were copied. Dates and medical facts are for software testing only. The syn-* and adm-* identifiers are deliberately non-MIMIC identifiers. Late and missing-time records test exclusion.

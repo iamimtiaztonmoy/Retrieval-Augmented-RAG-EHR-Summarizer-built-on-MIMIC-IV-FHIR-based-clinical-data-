@@ -1,0 +1,5 @@
+subject_id,hadm_id,labevent_id,itemid,charttime,storetime,value,valueuom
+syn-001,adm-001,lab-valid,lab-1,2150-01-02 10:00:00,2150-01-02 11:00:00,1.2,mg/dL
+syn-001,adm-001,lab-late,lab-1,2150-01-02 10:00:00,2150-01-06 10:00:00,9.9,mg/dL
+syn-001,adm-001,lab-missing,lab-1,2150-01-02 10:00:00,,8.8,mg/dL
+syn-001,,lab-unlinked,lab-1,2150-01-02 10:00:00,2150-01-02 11:00:00,7.7,mg/dL
