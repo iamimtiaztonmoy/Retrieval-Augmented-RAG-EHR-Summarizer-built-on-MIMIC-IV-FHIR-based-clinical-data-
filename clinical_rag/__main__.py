@@ -4,10 +4,13 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+import sqlite3
 from pathlib import Path
 import subprocess
 from . import store
 from .evaluation import evaluate, subject_split
+from .benchmark import benchmark
 from .generation import summarize
 from .ingest import build
 
@@ -38,12 +41,17 @@ def main():
             cmd.add_argument("--model")
             cmd.add_argument("--model-url", default="http://127.0.0.1:11434")
     ev = sub.add_parser("evaluate")
-    ev.add_argument("--db", type=Path, required=True)
-    ev.add_argument("--cases", type=Path, required=True)
-    ev.add_argument("--top-k", type=int, default=6)
-    ev.add_argument("--split", choices=["all", "train", "validation", "test"], default="test")
-    ev.add_argument("--seed", default="42")
-    ev.add_argument("--out", type=Path, required=True)
+    bench = sub.add_parser("benchmark", parents=[], help="Audit batch generation and failures")
+    bench.add_argument("--backend", choices=["extractive", "ollama"], default="extractive")
+    bench.add_argument("--model")
+    bench.add_argument("--model-url", default="http://127.0.0.1:11434")
+    for cmd in (ev, bench):
+        cmd.add_argument("--db", type=Path, required=True)
+        cmd.add_argument("--cases", type=Path, required=True)
+        cmd.add_argument("--top-k", type=int, default=6)
+        cmd.add_argument("--split", choices=["all", "train", "validation", "test"], default="test")
+        cmd.add_argument("--seed", default="42")
+        cmd.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "ingest":
         subjects = set(args.subjects.read_text().split()) if args.subjects else None
@@ -55,12 +63,14 @@ def main():
         return
     with store.connect(args.db) as conn:
         metadata = store.manifest(conn)
-        if args.command == "evaluate":
+        if args.command in {"evaluate", "benchmark"}:
             content = args.cases.read_bytes()
             cases = [json.loads(line) for line in content.decode().splitlines() if line.strip()]
             if args.split != "all":
                 cases = [c for c in cases if subject_split(c["subject_id"], args.seed) == args.split]
-            result = evaluate(conn, cases, args.top_k)
+            result = (benchmark(conn, cases, args.top_k, backend=args.backend,
+                                model=args.model, base_url=args.model_url)
+                      if args.command == "benchmark" else evaluate(conn, cases, args.top_k))
             result.update({"cases_sha256": hashlib.sha256(content).hexdigest(),
                            "split": args.split, "split_seed": args.seed})
         else:
@@ -76,9 +86,22 @@ def main():
         result["index_manifest"] = metadata
     try:
         result["git_commit"] = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL, text=True).strip()
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parent.parent, stderr=subprocess.DEVNULL, text=True).strip()
     except (OSError, subprocess.CalledProcessError):
         result["git_commit"] = "unavailable"
+    root = Path(__file__).resolve().parent.parent
+    result["runtime"] = {"python": platform.python_version(), "platform": platform.platform(),
+                         "sqlite": sqlite3.sqlite_version}
+    result["code_sha256"] = {
+        str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted((root / "clinical_rag").glob("*.py"))}
+    lock = root / "requirements-lock.txt"
+    result["requirements_lock_sha256"] = hashlib.sha256(lock.read_bytes()).hexdigest() if lock.exists() else None
+    try:
+        result["git_dirty"] = bool(subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=root, stderr=subprocess.DEVNULL, text=True).strip())
+    except (OSError, subprocess.CalledProcessError):
+        result["git_dirty"] = None
     args.out.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(args.out, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:

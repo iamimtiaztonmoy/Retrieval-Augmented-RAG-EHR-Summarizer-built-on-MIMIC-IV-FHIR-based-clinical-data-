@@ -7,6 +7,7 @@ import sqlite3
 from typing import Annotated
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
+from .schemas import RetrievalResponse, SummaryResponse
 from clinical_rag import store
 from clinical_rag.generation import summarize
 
@@ -59,13 +60,14 @@ def ready(conn=Depends(database)):
     return {"status": "ready", "chunks": count, "model_checked": False}
 
 
-@app.post("/v1/retrieve", dependencies=[Depends(authorized)])
+@app.post("/v1/retrieve", dependencies=[Depends(authorized)], response_model=RetrievalResponse)
 def retrieval(request: RetrievalRequest, conn=Depends(database)):
     evidence = store.retrieve(conn, request.subject_id, request.hadm_id, request.query, request.top_k)
     return {"evidence": evidence, "abstained": not evidence}
 
 
-@app.post("/v1/summarize", dependencies=[Depends(authorized)])
+@app.post("/v1/summarize", dependencies=[Depends(authorized)],
+          response_model=SummaryResponse, response_model_exclude_unset=True)
 def summary(request: RetrievalRequest, conn=Depends(database)):
     evidence = store.retrieve(conn, request.subject_id, request.hadm_id, request.query, request.top_k)
     try:

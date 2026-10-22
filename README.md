@@ -2,7 +2,7 @@
 
 A local LLM research pipeline for **query-focused, retrospective encounter summarization** using selected tables from full **MIMIC-IV 3.1**, with optional radiology reports from **MIMIC-IV-Note 2.2**. Each generated claim must cite retrieved evidence with an exact quotation. An extractive baseline runs without a model.
 
-**Status:** synthetic software validation only. Full MIMIC ingestion, real-model generation, clinical quality, and full-dataset throughput have **not** been validated. This is not clinical decision support. It does not train or fine-tune an LLM. The original FHIR/TF-IDF demo is retained as a legacy baseline.
+**Status:** synthetic software validation only. Real local inference has now been exercised on fictional fixtures; full MIMIC ingestion, clinical quality, and full-dataset throughput have **not** been validated. See the [batch audit](docs/batch-benchmark.md) for failures as well as accepted outputs. This is not clinical decision support. It does not train or fine-tune an LLM. The original FHIR/TF-IDF demo is retained as a legacy baseline.
 
 ## Prerequisites and data access
 
@@ -65,7 +65,7 @@ Captured synthetic output is in [examples/synthetic-summary.json](examples/synth
 Chest radiograph: right lower lobe opacity. No pleural effusion.
 ```
 
-The five authored retrieval cases include three positive cases and two negative/scope-isolation cases. The captured fixture run obtains source Recall@6 = 1.0, source MRR@6 = 1.0 and negative retrieval abstention = 1.0. These are **tiny software checks**, not clinical performance estimates or real LLM results. A live local API capture is in [examples/synthetic-api.json](examples/synthetic-api.json). The LLM HTTP protocol is tested with mocked responses and a loopback HTTP stub; no installed model was available in the validation environment.
+The five authored retrieval cases include three positive cases and two negative/scope-isolation cases. The captured fixture run obtains source Recall@6 = 1.0, source MRR@6 = 1.0 and negative retrieval abstention = 1.0. These are **tiny software checks**, not clinical performance estimates or real LLM results. A live local API capture is in [examples/synthetic-api.json](examples/synthetic-api.json). The LLM HTTP protocol is tested with mocked responses and a loopback HTTP stub. Real-model fixture audits are recorded in [the validation record](docs/validation.md); these remain software integration checks.
 
 ## Run with authorized full data
 
@@ -79,6 +79,8 @@ python -m clinical_rag ingest \
 ```
 
 Omit `--notes`, `--labs`, or `--prescriptions` if those sources are not part of your study. Use `--subjects /secure/cohort-subjects.txt` to limit ingestion to one subject ID per line. Do not mark real data `--synthetic`. The index stores input file SHA-256 hashes, file sizes, version declarations, selection, row inclusion/exclusion counts, Python/SQLite versions and chunk settings. Large event tables stream; admission and dictionary maps remain in memory. Full-cohort RAM, index size and latency are unmeasured. Begin with a defined pilot cohort.
+
+A real local-model fixture example is recorded in [the 1.5B batch output](examples/synthetic-llm-1.5b-benchmark.json): “The patient's creatinine level was recorded as 1.2 mg/dL.” The full artifact contains its exact lab quotation and evidence ID. That run accepted 2 of 3 answerable cases and rejected 1; 2 no-evidence cases abstained. This is a software check, not a clinical score. See [all results, including the failing 0.5B run](docs/validation.md).
 
 ### Local LLM generation
 
@@ -140,9 +142,9 @@ curl --fail-with-body http://127.0.0.1:8000/v1/summarize \
 | `POST /v1/retrieve` | Bearer token | Required `subject_id`, `hadm_id`, `query` strings; optional `top_k` 1–20; returns `evidence` array and `abstained` boolean |
 | `POST /v1/summarize` | Bearer token | Same inputs; returns `abstained`, `claims`, `reason`, `backend`, `prompt_version`, `prompt_sha256`, `evidence_ids`, `model`, and included `evidence` |
 
-`claims` is an array of `{text, citations:[{chunk_id, quote}]}`. Evidence objects contain `id`, `subject_id`, `hadm_id`, `source`, `source_id`, `event_time`, `text`, `rank`. Model metadata is null for abstention before validation, otherwise a backend-specific metadata object. No-match/unknown encounter yields HTTP 200 with empty evidence/claims and `abstained=true`. `reason` distinguishes missing evidence, model abstention and rejected model output.
+`claims` is an array of `{text, citations:[{chunk_id, quote}]}`. Evidence objects contain `id`, `subject_id`, `hadm_id`, `source`, `source_id`, `event_time`, `text`, `rank`. Model metadata is null when generation was skipped or a response could not be parsed; it is retained when parsed output fails citation/schema validation. Available Ollama token counts and nanosecond durations are included in `model.usage`. No-match/unknown encounter yields HTTP 200 with empty evidence/claims and `abstained=true`. `reason` distinguishes missing evidence, model abstention and rejected model output.
 
-Errors: 401 missing/incorrect token; 422 invalid body (including blank strings, extra fields, query >2,000 characters); 503 missing/invalid index, token configuration (<32 characters), or model configuration; 502 model transport failure. Invalid LLM schema/citations produce HTTP 200 with abstention and a reason, never unchecked generated text. Framework errors use `{"detail":...}` (string or validation-error array). Requests carry JSON bodies, not clinical text in URL query strings. `/docs` and `/openapi.json` describe request validation but do not establish clinical validity.
+Errors: 401 missing/incorrect token; 422 invalid body (including blank strings, extra fields, query >2,000 characters); 503 missing/invalid index, token configuration (<32 characters), or model configuration; 502 model transport failure. Invalid LLM schema/citations produce HTTP 200 with abstention and a reason, never unchecked generated text. Framework errors use `{"detail":...}` (string or validation-error array). Requests carry JSON bodies, not clinical text in URL query strings. `/docs` and `/openapi.json` define request validation and typed retrieval/summary success responses, including nested evidence, claims, citations and model metadata. They do not establish clinical validity.
 
 The bearer token grants access to the entire configured index, not a patient-specific entitlement. There is no per-user authorization, production TLS, audit service, rate limiter or multi-tenant isolation. Keep the service on loopback. It is a local research tool, not a deployed clinical application.
 
@@ -156,9 +158,11 @@ Patient-level splits use SHA-256 of `seed:subject_id` (80/10/10 bucket allocatio
 
 [Research protocol](docs/research-protocol.md) defines baseline comparisons, leakage controls, clinical review, uncertainty estimates and subgroup analyses. **Those experiments have not been run.** No clinical labels, human summaries, ROUGE/BERTScore results, factuality scores or full-data performance numbers are fabricated here.
 
+Batch generation audits are available through `python -m clinical_rag benchmark`; see [commands and output semantics](docs/batch-benchmark.md). They keep validation and transport failures in the denominator and record latency, available token usage, code/dependency hashes and Git state. They do not measure clinical factuality.
+
 ## Limitations and remaining evidence
 
-- Synthetic fixtures validate software behavior, not robustness to all full-release records or clinical quality. Full-scale ingestion, local model inference and version overlap need authorized local validation.
+- Synthetic fixtures validate software behavior, not robustness to all full-release records or clinical quality. Full-scale ingestion, clinical model behavior and version overlap need authorized local validation.
 - Retrospective billing diagnoses can encode post hoc knowledge. This pipeline must not be repurposed as an admission-time prediction model. Discharge notes remain excluded, but structured data can still overlap with a future reference summary.
 - Lexical retrieval lacks embeddings, synonym resolution and learned reranking. Short context may omit crucial evidence. Clinical abbreviations, negation, conflicting records and prompt injection remain open challenges.
 - Lab units are preserved verbatim, not converted or clinically interpreted. Prescription orders are not administrations. No age, severity, causal or discharge-medication inference is performed deterministically.

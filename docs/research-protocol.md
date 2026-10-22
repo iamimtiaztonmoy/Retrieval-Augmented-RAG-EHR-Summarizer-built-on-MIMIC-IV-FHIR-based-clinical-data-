@@ -49,4 +49,4 @@ Freeze Git commit and clean-worktree status; Python lock and OS/SQLite versions;
 
 ## Claims currently supported
 
-Only the synthetic software checks and captured extractive baseline are verified. No claim of clinical benefit, Harvard affiliation, publication readiness, full-data performance or model superiority is made. Empirical findings require authorized data access, installed local weights and human review.
+Synthetic software checks, an extractive baseline and real local-model fixture audits are recorded. The batch command measures mechanical outcome counts and retrieval/generation latency, retaining failures; it does not implement clinical scoring or statistical comparisons. No claim of clinical benefit, Harvard affiliation, publication readiness, full-data performance or model superiority is made. Empirical findings require authorized data access, installed local weights and human review.

@@ -15,3 +15,4 @@ jobs:
       - run: python -m pytest -q
       - run: python -m clinical_rag ingest --hosp tests/fixtures/hosp --notes tests/fixtures/note --labs --prescriptions --synthetic --db artifacts/ci.sqlite
       - run: python -m clinical_rag evaluate --db artifacts/ci.sqlite --cases tests/fixtures/cases.jsonl --split all --out artifacts/evaluation.json
+      - run: python -m clinical_rag benchmark --db artifacts/ci.sqlite --cases tests/fixtures/cases.jsonl --split all --backend extractive --out artifacts/benchmark.json
