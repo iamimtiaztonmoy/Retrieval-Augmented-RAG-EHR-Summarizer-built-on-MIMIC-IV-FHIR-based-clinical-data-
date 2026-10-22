@@ -1,0 +1,324 @@
+{
+  "backend": "ollama",
+  "requested_model": "qwen2.5:0.5b-instruct",
+  "cases": 5,
+  "status_counts": {
+    "answered": 0,
+    "abstained": 2,
+    "validation_failure": 3,
+    "transport_failure": 0
+  },
+  "answered_fraction": 0.0,
+  "mean_elapsed_seconds": 1.1894196238001313,
+  "retrieval": {
+    "cases": 5,
+    "positive_cases": 3,
+    "negative_cases": 2,
+    "top_k_chunks": 6,
+    "source_recall_at_k": 1.0,
+    "source_mrr_at_k": 1.0,
+    "source_hit_rate_at_k": 1.0,
+    "negative_retrieval_abstention_rate": 1.0,
+    "records": [
+      {
+        "case_id": "opacity",
+        "retrieved_sources": [
+          "radiology:rad-1"
+        ],
+        "relevant_sources": [
+          "radiology:rad-1"
+        ],
+        "abstained_retrieval": false
+      },
+      {
+        "case_id": "kidney",
+        "retrieved_sources": [
+          "diagnoses_icd:3"
+        ],
+        "relevant_sources": [
+          "diagnoses_icd:3"
+        ],
+        "abstained_retrieval": false
+      },
+      {
+        "case_id": "creatinine",
+        "retrieved_sources": [
+          "labevents:lab-valid"
+        ],
+        "relevant_sources": [
+          "labevents:lab-valid"
+        ],
+        "abstained_retrieval": false
+      },
+      {
+        "case_id": "no-evidence",
+        "retrieved_sources": [],
+        "relevant_sources": [],
+        "abstained_retrieval": true
+      },
+      {
+        "case_id": "wrong-encounter",
+        "retrieved_sources": [],
+        "relevant_sources": [],
+        "abstained_retrieval": true
+      }
+    ],
+    "clinical_quality_evaluated": false
+  },
+  "records": [
+    {
+      "case_id": "opacity",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-001",
+      "query": "opacity",
+      "status": "validation_failure",
+      "elapsed_seconds": 2.7751911990003464,
+      "output": {
+        "abstained": true,
+        "claims": [],
+        "reason": "citation_or_schema_validation_failed",
+        "backend": "ollama",
+        "prompt_version": "encounter-evidence-v1",
+        "prompt_sha256": "1c722a6bcafcc318fc346ed836301e91418dece319193efe6b637b090d42739b",
+        "evidence_ids": [
+          "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0"
+        ],
+        "model": {
+          "model": "qwen2.5:0.5b-instruct",
+          "model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+          "temperature": 0,
+          "seed": 42,
+          "num_ctx": 8192,
+          "num_predict": 2048,
+          "usage": {
+            "prompt_eval_count": 366,
+            "eval_count": 54,
+            "total_duration": 2715634973,
+            "load_duration": 1055438050,
+            "prompt_eval_duration": 811500000,
+            "eval_duration": 837350000
+          }
+        }
+      },
+      "evidence": [
+        {
+          "id": "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0",
+          "subject_id": "syn-001",
+          "hadm_id": "adm-001",
+          "source": "radiology",
+          "source_id": "rad-1",
+          "event_time": "2150-01-02 10:00:00",
+          "text": "Chest radiograph: right lower lobe opacity. No pleural effusion.",
+          "rank": -1.846895965088312
+        }
+      ]
+    },
+    {
+      "case_id": "kidney",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-002",
+      "query": "kidney",
+      "status": "validation_failure",
+      "elapsed_seconds": 1.6826343360003193,
+      "output": {
+        "abstained": true,
+        "claims": [],
+        "reason": "citation_or_schema_validation_failed",
+        "backend": "ollama",
+        "prompt_version": "encounter-evidence-v1",
+        "prompt_sha256": "ddc87a66294b60ef8df19a6aaa71d1a003da647e945fbe8491e2481d68a1a8c5",
+        "evidence_ids": [
+          "ffb4eb5fe3f2ca7415d455767e7c9b4b3707cbdc1740af3346b5433f6726491a"
+        ],
+        "model": {
+          "model": "qwen2.5:0.5b-instruct",
+          "model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+          "temperature": 0,
+          "seed": 42,
+          "num_ctx": 8192,
+          "num_predict": 2048,
+          "usage": {
+            "prompt_eval_count": 365,
+            "eval_count": 40,
+            "total_duration": 1679071355,
+            "load_duration": 1216478,
+            "prompt_eval_duration": 640531000,
+            "eval_duration": 1025387999
+          }
+        }
+      },
+      "evidence": [
+        {
+          "id": "ffb4eb5fe3f2ca7415d455767e7c9b4b3707cbdc1740af3346b5433f6726491a",
+          "subject_id": "syn-001",
+          "hadm_id": "adm-002",
+          "source": "diagnoses_icd",
+          "source_id": "3",
+          "event_time": "",
+          "text": "Retrospective billing diagnosis (not onset): ICD-10 N179; Acute kidney failure, unspecified; sequence=1.",
+          "rank": -0.9301438845399824
+        }
+      ]
+    },
+    {
+      "case_id": "creatinine",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-001",
+      "query": "creatinine",
+      "status": "validation_failure",
+      "elapsed_seconds": 1.48882579300016,
+      "output": {
+        "abstained": true,
+        "claims": [],
+        "reason": "citation_or_schema_validation_failed",
+        "backend": "ollama",
+        "prompt_version": "encounter-evidence-v1",
+        "prompt_sha256": "96d31f199a0c524a91e4c7db75e21b0e58c39faa2a0b48b101ef21333dc52e66",
+        "evidence_ids": [
+          "b4f5483d13545373cea8d96f64616ad8db6c3cf0c2fe9ce0ec081af2f19e9a70"
+        ],
+        "model": {
+          "model": "qwen2.5:0.5b-instruct",
+          "model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+          "temperature": 0,
+          "seed": 42,
+          "num_ctx": 8192,
+          "num_predict": 2048,
+          "usage": {
+            "prompt_eval_count": 410,
+            "eval_count": 40,
+            "total_duration": 1485175787,
+            "load_duration": 913753,
+            "prompt_eval_duration": 621796000,
+            "eval_duration": 855913000
+          }
+        }
+      },
+      "evidence": [
+        {
+          "id": "b4f5483d13545373cea8d96f64616ad8db6c3cf0c2fe9ce0ec081af2f19e9a70",
+          "subject_id": "syn-001",
+          "hadm_id": "adm-001",
+          "source": "labevents",
+          "source_id": "lab-valid",
+          "event_time": "2150-01-02 10:00:00",
+          "text": "Lab recorded at 2150-01-02 10:00:00 (stored 2150-01-02 11:00:00): Creatinine = 1.2 mg/dL.",
+          "rank": -1.2922494187427083
+        }
+      ]
+    },
+    {
+      "case_id": "no-evidence",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-001",
+      "query": "unobtainium",
+      "status": "abstained",
+      "elapsed_seconds": 0.0002375069998379331,
+      "output": {
+        "abstained": true,
+        "claims": [],
+        "reason": "no_matching_evidence",
+        "backend": "ollama",
+        "prompt_version": "encounter-evidence-v1",
+        "prompt_sha256": "c968008dbe569e583aec5a99c0e031da82a1b1fe3a662a6095e137fa7643838d",
+        "evidence_ids": [],
+        "model": null
+      },
+      "evidence": []
+    },
+    {
+      "case_id": "wrong-encounter",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-001",
+      "query": "embolism",
+      "status": "abstained",
+      "elapsed_seconds": 0.0002092839999932039,
+      "output": {
+        "abstained": true,
+        "claims": [],
+        "reason": "no_matching_evidence",
+        "backend": "ollama",
+        "prompt_version": "encounter-evidence-v1",
+        "prompt_sha256": "3081f2b3aa1074a396f4e91ff94c505b3064268f0fbe57f00af3059423b5addf",
+        "evidence_ids": [],
+        "model": null
+      },
+      "evidence": []
+    }
+  ],
+  "clinical_quality_evaluated": false,
+  "interpretation": "Answer and validation rates are mechanical checks, not factuality or clinical accuracy.",
+  "cases_sha256": "a9da148286c4cfcf2740a84c5b72d601233d5bb473ae3af19132f28f02dfc8e7",
+  "split": "all",
+  "split_seed": "42",
+  "index_manifest": {
+    "admissions": 3,
+    "chunk_size_chars": 1200,
+    "counts": {
+      "diagnoses_icd_included": 3,
+      "labevents_included": 1,
+      "missing_or_invalid_time": 1,
+      "outside_encounter_or_late": 2,
+      "prescriptions_included": 1,
+      "radiology_included": 3,
+      "unselected_or_unlinked": 1
+    },
+    "dataset": "synthetic-fixture",
+    "dataset_version": "3.1",
+    "discharge_notes_indexed": false,
+    "files": {
+      "admissions": {
+        "bytes": 211,
+        "sha256": "1c051bc0138dc2c91256f9bd66402dd768d8294026f100772fd578bf79b12e50"
+      },
+      "d_icd_diagnoses": {
+        "bytes": 121,
+        "sha256": "1aa71cca1b0855e487b4f09c08fa7303a3eed1e813b6efde95c6c18a782df243"
+      },
+      "d_labitems": {
+        "bytes": 32,
+        "sha256": "db39b2bfefc1a75f488bf53fd8310f209f4af08558cfb8e7c2001d681592a9d5"
+      },
+      "diagnoses_icd": {
+        "bytes": 130,
+        "sha256": "8844833d7a0c00d29b4910d404ccafeff532177d736409b7fa6ade9ecf8e4a2f"
+      },
+      "labevents": {
+        "bytes": 384,
+        "sha256": "73b1db915f2230fc5882c0fb6a4190fb766f419f1b1174ff985fa41b3beafa2d"
+      },
+      "prescriptions": {
+        "bytes": 142,
+        "sha256": "bbd4a52d46907f720d602b0f44c1fea8c7949b61228662c5d3503e7f647fc55e"
+      },
+      "radiology": {
+        "bytes": 503,
+        "sha256": "ee43443c49ef3c7475c493a30380af13f44200a14916b144141fd81e10e7e214"
+      }
+    },
+    "note_version": "2.2",
+    "overlap_chars": 150,
+    "project_version": "0.2.0",
+    "python": "3.12.14",
+    "sqlite": "3.53.1",
+    "subject_filter": null,
+    "task": "retrospective_encounter_evidence_summary"
+  },
+  "git_commit": "unavailable",
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "sqlite": "3.53.1"
+  },
+  "code_sha256": {
+    "clinical_rag/__init__.py": "322aedc4df5531d34fea9cfe3c5314c156161c58375c7e4ebba640d24aad39fc",
+    "clinical_rag/__main__.py": "83f841441ea6194fb4932bf01f2a254b0e45dfa56a13d1e1893068cb6b627d11",
+    "clinical_rag/benchmark.py": "ffaa88aa214e11503f2b7416fd08720845fc522906314f6bf97319bcc47d9817",
+    "clinical_rag/evaluation.py": "bd194bf3ec8d77dba69e8bf3f663810e093d27808d38343830bcb62a5b8843f6",
+    "clinical_rag/generation.py": "c4adba4e88561ea828593c334331c0e0d521d8c48f0306e2b5af4ee9fa90f59d",
+    "clinical_rag/ingest.py": "63f3bb85cbdbf64712a36fd81390bdc20d72df6c54d8e76c01bf75063fd299b6",
+    "clinical_rag/store.py": "ef4f46d6b1a5d8ab32ec420ce89b666170abfcd2e458292294846eafa151b140"
+  },
+  "requirements_lock_sha256": "c7a248aca826f9e49decf7eb99dec64f5bd69c10946392a0a207fe4a32f86a49",
+  "git_dirty": true
+}

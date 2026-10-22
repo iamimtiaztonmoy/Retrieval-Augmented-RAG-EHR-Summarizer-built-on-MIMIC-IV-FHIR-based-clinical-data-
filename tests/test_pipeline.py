@@ -239,3 +239,43 @@ def test_deterministic_chunk_boundaries_and_citation_scope(tmp_path):
     assert chunks[0]['text'][-150:]==chunks[1]['text'][:150]
     assert chunks[0]['id']!=chunks[1]['id']
     conn.close()
+
+
+def test_benchmark_keeps_failures_in_denominator(db, monkeypatch):
+    from clinical_rag.benchmark import benchmark
+    cases=[json.loads(x) for x in (FIXTURE/'cases.jsonl').read_text().splitlines()]
+    with store.connect(db) as conn:
+        base=benchmark(conn,cases)
+        assert base['status_counts']=={'answered':3,'abstained':2,
+            'validation_failure':0,'transport_failure':0}
+        assert base['clinical_quality_evaluated'] is False
+        def fail(*args): raise URLError('private detail must not be recorded')
+        monkeypatch.setattr(Ollama,'generate',fail)
+        out=benchmark(conn,cases,backend='ollama',model='stub:test')
+        assert out['cases']==5 and out['status_counts']['transport_failure']==3
+        assert out['status_counts']['abstained']==2
+        assert 'private detail' not in json.dumps(out)
+        assert out['answered_fraction']==0
+        with pytest.raises(ValueError): benchmark(conn,cases,backend='ollama')
+
+
+def test_benchmark_rejected_citations_retain_model_identity(db, monkeypatch):
+    from clinical_rag.benchmark import benchmark
+    case=json.loads((FIXTURE/'cases.jsonl').read_text().splitlines()[0])
+    def bad(*args):
+        return {'abstained':False,'claims':[{'text':'Bad', 'citations':[]}]}, {
+            'model':'stub:test','model_digest':'test-only'}
+    monkeypatch.setattr(Ollama,'generate',bad)
+    with store.connect(db) as conn:
+        out=benchmark(conn,[case],backend='ollama',model='stub:test')
+    assert out['status_counts']['validation_failure']==1
+    assert out['records'][0]['output']['model']['model_digest']=='test-only'
+    assert out['records'][0]['output']['claims']==[]
+
+
+def test_openapi_defines_success_response_contract():
+    schema=app.openapi()
+    response=schema['paths']['/v1/summarize']['post']['responses']['200']
+    assert response['content']['application/json']['schema']['$ref'].endswith('/SummaryResponse')
+    assert 'claims' in schema['components']['schemas']['SummaryResponse']['required']
+    assert 'rank' in schema['components']['schemas']['Evidence']['required']

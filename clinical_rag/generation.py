@@ -117,7 +117,11 @@ class Ollama:
             raise ValueError("Incomplete model output")
         output = json.loads(result["message"]["content"])
         return output, {"model": self.model, "model_digest": entry["digest"],
-                        "temperature": 0, "seed": 42, "num_ctx": 8192, "num_predict": 2048}
+                        "temperature": 0, "seed": 42, "num_ctx": 8192, "num_predict": 2048,
+                        "usage": {key: result[key] for key in (
+                            "prompt_eval_count", "eval_count", "total_duration",
+                            "load_duration", "prompt_eval_duration", "eval_duration")
+                            if key in result}}
 
 
 def summarize(evidence: list[dict], question: str, *, backend: str = "extractive",
@@ -152,6 +156,7 @@ def summarize(evidence: list[dict], question: str, *, backend: str = "extractive
         except (ValueError, KeyError, TypeError):
             result["reason"] = "invalid_model_response"
             return result
+    result["model"] = metadata
     try:
         validated = validate_output(output, selected)
     except ValueError:
