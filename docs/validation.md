@@ -14,13 +14,15 @@
 
 No full restricted data, credentials, model weights, real patient-level labels or generated MIMIC content were accessed or added. The pre-existing demo CSV remains a legacy artifact and is not input to the new pipeline.
 
+GitHub Actions also passed the locked install, tests, synthetic ingestion and evaluation for implementation commit `840ed6bbdf57ab4d44e33b6337d5f167b532aabb`: [CI run](https://github.com/iamimtiaztonmoy/Retrieval-Augmented-RAG-EHR-Summarizer-built-on-MIMIC-IV-FHIR-based-clinical-data-/actions/runs/39714152457).
+
 ## Not verified
 
 - End-to-end ingestion of MIMIC-IV 3.1 and Note 2.2; header/data irregularities and actual join coverage.
 - Full-data throughput, disk/RAM budgets, retrieval latency and crash recovery.
 - An installed Ollama release/model with real generation, its hardware behavior, truncation, factuality or clinical usefulness.
 - Independent clinician relevance/summary labels, clinical outcome benefit, external validity, subgroup fairness, confidence intervals or model comparisons.
-- Hosted CI success: the workflow is provided; local tests do not imply GitHub Actions ran successfully.
+- Clinical validation is still absent even when automated CI passes.
 
 ## Prioritized plan
 
@@ -38,3 +40,4 @@ No full restricted data, credentials, model weights, real patient-level labels o
 ## API migration
 
 `GET /summary` from the original demo is removed from `api.main:app`. Use `POST /v1/retrieve` or `POST /v1/summarize`, provide both scope identifiers and a bearer token. The old parser and TF-IDF classes remain available for legacy demonstrations. This is an intentional breaking API change, not a compatible patch.
+
