@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "encounter-evidence-summarizer"
+version = "0.2.0"
+description = "Local LLM research pipeline for encounter-scoped MIMIC-IV evidence summarization"
+requires-python = ">=3.12,<3.13"
+dependencies = ["fastapi==0.159.1", "uvicorn==0.54.0", "pydantic==2.14.0", "scikit-learn==1.8.0"]
+
+[tool.setuptools.packages.find]
+include = ["clinical_rag*", "api*", "src*"]
+namespaces = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

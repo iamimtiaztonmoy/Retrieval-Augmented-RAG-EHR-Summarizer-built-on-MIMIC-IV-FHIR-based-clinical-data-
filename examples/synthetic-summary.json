@@ -1,0 +1,94 @@
+{
+  "abstained": false,
+  "claims": [
+    {
+      "text": "Chest radiograph: right lower lobe opacity. No pleural effusion.",
+      "citations": [
+        {
+          "chunk_id": "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0",
+          "quote": "Chest radiograph: right lower lobe opacity. No pleural effusion."
+        }
+      ]
+    }
+  ],
+  "reason": null,
+  "backend": "extractive",
+  "prompt_version": "encounter-evidence-v1",
+  "prompt_sha256": "1c722a6bcafcc318fc346ed836301e91418dece319193efe6b637b090d42739b",
+  "evidence_ids": [
+    "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0"
+  ],
+  "model": {
+    "model": "none-extractive-baseline"
+  },
+  "evidence": [
+    {
+      "id": "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0",
+      "subject_id": "syn-001",
+      "hadm_id": "adm-001",
+      "source": "radiology",
+      "source_id": "rad-1",
+      "event_time": "2150-01-02 10:00:00",
+      "text": "Chest radiograph: right lower lobe opacity. No pleural effusion.",
+      "rank": -1.846895965088312
+    }
+  ],
+  "subject_id": "syn-001",
+  "hadm_id": "adm-001",
+  "query": "opacity",
+  "top_k": 6,
+  "index_manifest": {
+    "admissions": 3,
+    "chunk_size_chars": 1200,
+    "counts": {
+      "diagnoses_icd_included": 3,
+      "labevents_included": 1,
+      "missing_or_invalid_time": 1,
+      "outside_encounter_or_late": 2,
+      "prescriptions_included": 1,
+      "radiology_included": 3,
+      "unselected_or_unlinked": 1
+    },
+    "dataset": "synthetic-fixture",
+    "dataset_version": "3.1",
+    "discharge_notes_indexed": false,
+    "files": {
+      "admissions": {
+        "bytes": 211,
+        "sha256": "1c051bc0138dc2c91256f9bd66402dd768d8294026f100772fd578bf79b12e50"
+      },
+      "d_icd_diagnoses": {
+        "bytes": 121,
+        "sha256": "1aa71cca1b0855e487b4f09c08fa7303a3eed1e813b6efde95c6c18a782df243"
+      },
+      "d_labitems": {
+        "bytes": 32,
+        "sha256": "db39b2bfefc1a75f488bf53fd8310f209f4af08558cfb8e7c2001d681592a9d5"
+      },
+      "diagnoses_icd": {
+        "bytes": 130,
+        "sha256": "8844833d7a0c00d29b4910d404ccafeff532177d736409b7fa6ade9ecf8e4a2f"
+      },
+      "labevents": {
+        "bytes": 384,
+        "sha256": "73b1db915f2230fc5882c0fb6a4190fb766f419f1b1174ff985fa41b3beafa2d"
+      },
+      "prescriptions": {
+        "bytes": 142,
+        "sha256": "bbd4a52d46907f720d602b0f44c1fea8c7949b61228662c5d3503e7f647fc55e"
+      },
+      "radiology": {
+        "bytes": 503,
+        "sha256": "ee43443c49ef3c7475c493a30380af13f44200a14916b144141fd81e10e7e214"
+      }
+    },
+    "note_version": "2.2",
+    "overlap_chars": 150,
+    "project_version": "0.2.0",
+    "python": "3.12.14",
+    "sqlite": "3.53.1",
+    "subject_filter": null,
+    "task": "retrospective_encounter_evidence_summary"
+  },
+  "git_commit": "unavailable"
+}

@@ -1,0 +1,5 @@
+subject_id,hadm_id,note_id,charttime,storetime,text
+syn-001,adm-001,rad-1,2150-01-02 10:00:00,2150-01-02 11:00:00,Chest radiograph: right lower lobe opacity. No pleural effusion.
+syn-001,adm-002,rad-2,2150-02-02 10:00:00,2150-02-02 11:00:00,Other admission: pulmonary embolism is present.
+syn-002,adm-003,rad-3,2150-01-02 10:00:00,2150-01-02 11:00:00,Other patient: pulmonary embolism is present.
+syn-001,adm-001,rad-late,2150-01-02 10:00:00,2150-01-06 11:00:00,Late report with secretlatefinding.

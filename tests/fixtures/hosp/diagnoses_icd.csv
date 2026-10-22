@@ -1,0 +1,4 @@
+subject_id,hadm_id,icd_code,icd_version,seq_num
+syn-001,adm-001,J189,10,1
+syn-001,adm-002,N179,10,1
+syn-002,adm-003,N179,10,1

@@ -1,0 +1,5 @@
+# Direct dependencies for API and legacy FHIR demo. Python 3.12.
+fastapi==0.159.1
+uvicorn==0.54.0
+pydantic==2.14.0
+scikit-learn==1.8.0

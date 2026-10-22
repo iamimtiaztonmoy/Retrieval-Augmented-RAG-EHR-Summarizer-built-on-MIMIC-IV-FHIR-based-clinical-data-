@@ -29,7 +29,7 @@ from src.summarizer import RetrievalSummariser
 def main() -> None:
     # Determine the directory containing FHIR NDJSON files.  Allow
     # overriding via environment variable for flexibility.
-    default_path = Path(__file__).resolve().parent.parent / "../mimic_iv_demo/mimic-iv-clinical-database-demo-on-fhir-2.1.0/fhir"
+    default_path = Path(__file__).resolve().parent.parent / "mimic_iv_demo/mimic-iv-clinical-database-demo-on-fhir-2.1.0/fhir"
     fhir_dir = Path(os.environ.get("FHIR_DIR", default_path))
     if not fhir_dir.exists():
         raise FileNotFoundError(
@@ -75,3 +75,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

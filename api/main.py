@@ -1,97 +1,80 @@
-"""FastAPI application exposing a simple summary service.
-
-The API provides two endpoints:
-
-* **GET /health** — liveness check.
-* **GET /summary** — given a `patient_id` or a free‑text `query`,
-  return the most relevant patient summary.  If an exact patient id is
-  provided and found, that summary is returned.  Otherwise the query
-  string is used in a retrieval over all summaries.
-
-Start the server locally with:
-
-```bash
-uvicorn api.main:app --reload --port 8000
-```
-
-This file lives under the `api/` package so that it can be run
-independently of the rest of the project.
-"""
-
+"""Authenticated local research API. Bind to loopback; not a multi-user deployment."""
 from __future__ import annotations
-
-import csv
-from functools import lru_cache
+import hmac
+import os
 from pathlib import Path
-from typing import Dict, List, Optional
+import sqlite3
+from typing import Annotated
+from fastapi import Depends, FastAPI, Header, HTTPException
+from pydantic import BaseModel, ConfigDict, Field
+from clinical_rag import store
+from clinical_rag.generation import summarize
 
-from fastapi import FastAPI, HTTPException, Query
-
-from src.summarizer import RetrievalSummariser
-
-app = FastAPI(title="MIMIC‑IV Demo Summarisation API")
-
-
-@lru_cache(maxsize=1)
-def _load_summaries() -> Dict[str, str]:
-    """Load patient summaries from the CSV file.
-
-    Returns:
-        Mapping of patient id to summary text.
-    """
-    csv_path = Path(__file__).resolve().parent.parent / "data" / "patient_summaries.csv"
-    summaries: Dict[str, str] = {}
-    if not csv_path.exists():
-        raise FileNotFoundError(
-            f"Expected summary CSV at {csv_path}, please run demo.py to generate it."
-        )
-    with open(csv_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            summaries[row["patient_id"]] = row["summary"]
-    return summaries
+app = FastAPI(title="Encounter Evidence Summarizer", version="0.2.0")
 
 
-@lru_cache(maxsize=1)
-def _init_retriever() -> RetrievalSummariser:
-    """Instantiate the retrieval summariser from loaded summaries."""
-    summaries = _load_summaries()
-    docs: List[str] = list(summaries.values())
-    return RetrievalSummariser(docs)
+class RetrievalRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    subject_id: str = Field(min_length=1, max_length=64)
+    hadm_id: str = Field(min_length=1, max_length=64)
+    query: str = Field(min_length=1, max_length=2000)
+    top_k: int = Field(default=6, ge=1, le=20)
+
+
+def authorized(authorization: Annotated[str | None, Header()] = None):
+    token = os.getenv("RAG_API_TOKEN", "")
+    if len(token) < 32:
+        raise HTTPException(503, "Configure RAG_API_TOKEN with at least 32 characters")
+    if not authorization or not hmac.compare_digest(authorization.encode(), ("Bearer " + token).encode()):
+        raise HTTPException(401, "Unauthorized", headers={"WWW-Authenticate": "Bearer"})
+
+
+def database():
+    path = os.getenv("RAG_DB")
+    if not path:
+        raise HTTPException(503, "Index not configured")
+    conn = None
+    try:
+        conn = store.connect(Path(path))
+        store.manifest(conn)
+        yield conn
+    except (sqlite3.Error, ValueError, OSError):
+        raise HTTPException(503, "Index unavailable or invalid") from None
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok"}
+def health():
+    return {"status": "ok", "clinical_validation": False}
 
 
-@app.get("/summary")
-def get_summary(
-    patient_id: Optional[str] = Query(None, description="Exact patient UUID"),
-    query: Optional[str] = Query(None, description="Free text query")
-):
-    """Return a summary for a patient ID or a query string.
+@app.get("/ready", dependencies=[Depends(authorized)])
+def ready(conn=Depends(database)):
+    count = conn.execute("SELECT count(*) FROM chunks").fetchone()[0]
+    conn.execute("SELECT rowid FROM evidence WHERE evidence MATCH 'readinessprobe' LIMIT 1").fetchall()
+    if not count:
+        raise HTTPException(503, "Index contains no evidence")
+    return {"status": "ready", "chunks": count, "model_checked": False}
 
-    If `patient_id` is provided and found in the summaries, the
-    corresponding summary is returned directly.  Otherwise, the
-    retrieval engine is used with the provided `query` (or the
-    patient_id string) to find the most similar summary.
-    """
-    summaries = _load_summaries()
-    retriever = _init_retriever()
-    if patient_id and patient_id in summaries:
-        return {"patient_id": patient_id, "summary": summaries[patient_id]}
-    # Determine which query string to use
-    q = query or patient_id
-    if not q:
-        raise HTTPException(status_code=400, detail="Either patient_id or query must be provided")
-    results = retriever.query(q, top_k=3)
-    if not results:
-        raise HTTPException(status_code=404, detail="No summaries found for the given query")
-    response = []
-    # Map back to patient ids by matching summary text; this is O(n)
-    inv_map = {v: k for k, v in summaries.items()}
-    for summary_text, score in results:
-        pid = inv_map.get(summary_text, "unknown")
-        response.append({"patient_id": pid, "summary": summary_text, "score": score})
-    return {"results": response}
+
+@app.post("/v1/retrieve", dependencies=[Depends(authorized)])
+def retrieval(request: RetrievalRequest, conn=Depends(database)):
+    evidence = store.retrieve(conn, request.subject_id, request.hadm_id, request.query, request.top_k)
+    return {"evidence": evidence, "abstained": not evidence}
+
+
+@app.post("/v1/summarize", dependencies=[Depends(authorized)])
+def summary(request: RetrievalRequest, conn=Depends(database)):
+    evidence = store.retrieve(conn, request.subject_id, request.hadm_id, request.query, request.top_k)
+    try:
+        result = summarize(evidence, request.query, backend=os.getenv("RAG_BACKEND", "extractive"),
+                           model=os.getenv("RAG_MODEL"),
+                           base_url=os.getenv("RAG_MODEL_URL", "http://127.0.0.1:11434"))
+    except (OSError, TimeoutError):
+        raise HTTPException(502, "Local model unavailable") from None
+    except ValueError:
+        raise HTTPException(503, "Invalid local model configuration") from None
+    result["evidence"] = [r for r in evidence if r["id"] in result["evidence_ids"]]
+    return result

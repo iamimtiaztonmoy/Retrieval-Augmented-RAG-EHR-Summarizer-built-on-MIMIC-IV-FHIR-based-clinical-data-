@@ -1,0 +1,5 @@
+{"case_id": "opacity", "subject_id": "syn-001", "hadm_id": "adm-001", "query": "opacity", "relevant_sources": ["radiology:rad-1"]}
+{"case_id": "kidney", "subject_id": "syn-001", "hadm_id": "adm-002", "query": "kidney", "relevant_sources": ["diagnoses_icd:3"]}
+{"case_id": "creatinine", "subject_id": "syn-001", "hadm_id": "adm-001", "query": "creatinine", "relevant_sources": ["labevents:lab-valid"]}
+{"case_id": "no-evidence", "subject_id": "syn-001", "hadm_id": "adm-001", "query": "unobtainium", "relevant_sources": []}
+{"case_id": "wrong-encounter", "subject_id": "syn-001", "hadm_id": "adm-001", "query": "embolism", "relevant_sources": []}

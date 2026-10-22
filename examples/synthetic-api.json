@@ -1,0 +1,89 @@
+{
+  "description": "Captured live loopback HTTP using fictional fixtures and extractive backend; no model inference.",
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "clinical_validation": false
+    }
+  },
+  "ready": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "chunks": 8,
+      "model_checked": false
+    }
+  },
+  "summary": {
+    "status": 200,
+    "body": {
+      "abstained": false,
+      "claims": [
+        {
+          "text": "Chest radiograph: right lower lobe opacity. No pleural effusion.",
+          "citations": [
+            {
+              "chunk_id": "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0",
+              "quote": "Chest radiograph: right lower lobe opacity. No pleural effusion."
+            }
+          ]
+        }
+      ],
+      "reason": null,
+      "backend": "extractive",
+      "prompt_version": "encounter-evidence-v1",
+      "prompt_sha256": "1c722a6bcafcc318fc346ed836301e91418dece319193efe6b637b090d42739b",
+      "evidence_ids": [
+        "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0"
+      ],
+      "model": {
+        "model": "none-extractive-baseline"
+      },
+      "evidence": [
+        {
+          "id": "2db4cb06628e3eb65963f2cd9bb66ed04eb2ff9efb0e3c452edc2781e99d3da0",
+          "subject_id": "syn-001",
+          "hadm_id": "adm-001",
+          "source": "radiology",
+          "source_id": "rad-1",
+          "event_time": "2150-01-02 10:00:00",
+          "text": "Chest radiograph: right lower lobe opacity. No pleural effusion.",
+          "rank": -1.846895965088312
+        }
+      ]
+    }
+  },
+  "no_evidence": {
+    "status": 200,
+    "body": {
+      "evidence": [],
+      "abstained": true
+    }
+  },
+  "unauthorized": {
+    "status": 401,
+    "body": {
+      "detail": "Unauthorized"
+    }
+  },
+  "invalid_request": {
+    "status": 422,
+    "body": {
+      "detail": [
+        {
+          "type": "string_too_short",
+          "loc": [
+            "body",
+            "query"
+          ],
+          "msg": "String should have at least 1 character",
+          "input": " ",
+          "ctx": {
+            "min_length": 1
+          }
+        }
+      ]
+    }
+  }
+}

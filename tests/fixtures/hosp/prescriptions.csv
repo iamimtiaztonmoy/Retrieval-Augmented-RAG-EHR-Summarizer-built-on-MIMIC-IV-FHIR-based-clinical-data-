@@ -1,0 +1,2 @@
+subject_id,hadm_id,pharmacy_id,starttime,drug,dose_val_rx,dose_unit_rx,route
+syn-001,adm-001,rx-1,2150-01-02 10:00:00,Amoxicillin,500,mg,PO
